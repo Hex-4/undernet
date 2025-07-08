@@ -1,5 +1,6 @@
 # Generated with ChatGPT. I'm sorry.
 
+
 import random
 import base64
 import sys
@@ -99,6 +100,8 @@ for i in range(NUM_LINES):
 insert_index = int(NUM_LINES * INSERT_REAL_URL_AT)
 log_lines.insert(insert_index, f"base64://{real_encoded}")
 log_lines.insert(insert_index, "[CRITICAL] Saving memory fragment to:")
+
+log_lines.append("[FATAL] Process killed for an unknown reason.")
 
 # === Write file ===
 with open(output_filename, "w") as f:
