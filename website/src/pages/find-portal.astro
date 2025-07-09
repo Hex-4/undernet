@@ -1,0 +1,63 @@
+---
+import './src/styles/global.css' 
+---
+
+<script>
+    import QrScanner from 'qr-scanner';
+
+    import { sha256 } from "js-sha256";
+    
+    let videoElem = document.getElementById("webcam")
+
+
+    
+    const qrHashes = [
+    "4f98f352df1e6f3931e67c02559850621ffe47788530fc011908d3d58f4c69fc","ee449262c87003a0d0fe2e04210dc132d910f6cb75f33ed7cc7552981cb592ec","4e2751e77ac8144152a2b9307debc194775e376fb25257c89f21de5a336dfcd7","65a5cc1dc19611426eb836d84f5a588dedd48606c16fe40b7fc9f0e595d9168b","dc63ce85acd5c0da62092339dd4882daa2ecc53c96d056d0a5303884fe314dcc",
+    ]
+
+    const hints = [
+        "somewhere, lol.",
+        "somewhere else i think :3 :3 :3 :3 :3",
+        "i forgor :skull:",
+        "on planet Earth",
+        "why are you asking meeeeeeeeeeeeeee?"
+    ]
+
+    let current_qr = 0
+
+    let hint = document.getElementById("hint")
+
+    hint.innerText = hints[current_qr]
+
+    function process_qr(result) {
+        let hash = sha256(result.data)
+        if (hash == qrHashes[current_qr]) {
+            current_qr++
+            document.getElementById("status").innerText = (current_qr).toString() + document.getElementById("status").innerText.substring(1)
+            hint.innerText = hints[current_qr]
+            var audio = new Audio('https://hc-cdn.hel1.your-objectstorage.com/s/v3/da4cd6baf761a36cdfc7df9b48c5a4c137e0104b_qr-sound_audio.mp4');
+            audio.play();
+
+        }
+    }
+    
+    const qrScanner = new QrScanner(
+        videoElem,
+        process_qr,
+        {returnDetailedScanResult: true, overlay: document.getElementById("outline"), highlightCodeOutline: true, },
+    );
+
+    qrScanner.start();
+</script>
+
+<div class="w-screen h-svh bg-slate-900 overflow-hidden fixed">
+    <div class="absolute bg-slate-700/75 !backdrop-blur-xl w-screen h-2/12 rounded-b-[64px] z-40 outline outline-white outline-1"></div>
+    <span id="status" class="absolute top-[100px] left-1/2 -translate-x-1/2 z-40 font-hack text-6xl font-bold italic text-nowrap text-white">0/5 QR CODES FOUND</span>
+    <span class="absolute top-[170px] left-1/2 -translate-x-1/2 z-40 font-hack text-5xl italic text-nowrap text-white">phone recommended</span>
+    <video id="webcam" class="w-screen max-h-screen object-cover -z-30"></video>
+    <div id="outline" class="rounded-3xl !fill-violet-800 !stroke-lime-500 !stroke-3 absolute z-30"></div>
+    <div class="absolute bottom-0 bg-slate-700/75 !backdrop-blur-xl inset-x-0 h-75 rounded-t-[64px] z-40 outline outline-white outline-1"></div>
+    <span class="absolute bottom-[170px] left-1/2 -translate-x-1/2 z-40 font-hack text-5xl italic text-nowrap text-white">HINT</span>
+    <span id="hint" class="absolute bottom-[100px] left-1/2 -translate-x-1/2 z-40 font-hack text-6xl font-bold italic text-nowrap text-white">loading hint...</span>
+</div>
+  
