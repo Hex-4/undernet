@@ -1,736 +1,52 @@
 ---
+import './src/styles/global.css' 
 ---
+
+<style>
+  body {
+    background: oklch(12.9% 0.042 264.695);
+    background-image: radial-gradient(oklch(27.9% 0.041 260.031) 2px, transparent 0);
+    background-size: 40px 40px;
+    background-position: -19px -19px;
+  }
+</style>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ORPHEUS RECONSTRUCTOR - UNDERNET</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Orbitron', monospace;
-      background: linear-gradient(135deg, #1a0033, #330066, #4d0099);
-      color: #00ffff;
-      min-height: 100vh;
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    /* Animated background */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: 
-        radial-gradient(circle at 20% 50%, rgba(255, 0, 255, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(0, 255, 255, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 40% 80%, rgba(255, 255, 0, 0.2) 0%, transparent 50%);
-      animation: bgShift 10s ease-in-out infinite alternate;
-      z-index: -1;
-    }
-
-    @keyframes bgShift {
-      0% { transform: scale(1) rotate(0deg); }
-      100% { transform: scale(1.1) rotate(5deg); }
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 40px;
-      animation: glowPulse 3s ease-in-out infinite alternate;
-    }
-
-    @keyframes glowPulse {
-      0% { text-shadow: 0 0 20px #00ffff; }
-      100% { text-shadow: 0 0 40px #00ffff, 0 0 60px #ff00ff; }
-    }
-
-    .title {
-      font-size: 4rem;
-      font-weight: 900;
-      background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
-      background-size: 200% 200%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: gradientShift 3s ease-in-out infinite;
-      margin-bottom: 10px;
-    }
-
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    .subtitle {
-      font-size: 1.2rem;
-      color: #00ff88;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-    }
-
-    .upload-section {
-      background: rgba(0, 0, 0, 0.6);
-      border: 2px solid #00ffff;
-      border-radius: 15px;
-      padding: 30px;
-      margin-bottom: 40px;
-      box-shadow: 0 0 50px rgba(0, 255, 255, 0.3);
-    }
-
-    .upload-form {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      align-items: center;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      width: 100%;
-      max-width: 400px;
-    }
-
-    label {
-      font-weight: 700;
-      color: #00ff88;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    input[type="text"], input[type="file"] {
-      padding: 15px;
-      background: rgba(0, 0, 0, 0.8);
-      border: 2px solid #00ffff;
-      border-radius: 10px;
-      color: #00ffff;
-      font-family: 'Orbitron', monospace;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-
-    input[type="text"]:focus, input[type="file"]:focus {
-      outline: none;
-      border-color: #ff00ff;
-      box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
-    }
-
-    .submit-btn {
-      padding: 15px 40px;
-      background: linear-gradient(45deg, #ff00ff, #00ffff);
-      border: none;
-      border-radius: 10px;
-      color: black;
-      font-family: 'Orbitron', monospace;
-      font-weight: 700;
-      font-size: 1.1rem;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      transition: all 0.3s ease;
-      animation: btnPulse 2s ease-in-out infinite alternate;
-    }
-
-    @keyframes btnPulse {
-      0% { box-shadow: 0 0 20px rgba(255, 0, 255, 0.5); }
-      100% { box-shadow: 0 0 40px rgba(0, 255, 255, 0.8); }
-    }
-
-    .submit-btn:hover {
-      transform: scale(1.05);
-      background: linear-gradient(45deg, #00ffff, #ff00ff);
-    }
-
-    .submit-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      animation: none;
-    }
-
-    .reconstruction-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 30px;
-      margin-bottom: 40px;
-    }
-
-    .set-container {
-      background: rgba(0, 0, 0, 0.7);
-      border: 2px solid #00ff88;
-      border-radius: 15px;
-      padding: 25px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .set-container::before {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      background: linear-gradient(45deg, #00ff88, #00ffff, #ff00ff, #ffff00);
-      background-size: 400% 400%;
-      animation: borderGlow 4s ease-in-out infinite;
-      z-index: -1;
-      border-radius: 15px;
-    }
-
-    @keyframes borderGlow {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    .set-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 20px;
-      color: #00ff88;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      transition: all 0.5s ease;
-    }
-
-    .set-title.hidden {
-      color: #666;
-      text-shadow: none;
-    }
-
-    .set-title.revealed {
-      animation: titleReveal 1s ease-out;
-    }
-
-    @keyframes titleReveal {
-      0% { 
-        color: #666;
-        transform: scale(0.8);
-        filter: blur(5px);
-      }
-      50% { 
-        transform: scale(1.1);
-        filter: blur(0px);
-        color: #ffff00;
-      }
-      100% { 
-        transform: scale(1);
-        color: #00ff88;
-      }
-    }
-
-    .fragments {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-    }
-
-    .fragment {
-      aspect-ratio: 1;
-      background: rgba(0, 0, 0, 0.8);
-      border: 1px solid #333;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      font-weight: 700;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-
-    .fragment.empty {
-      border-color: #666;
-      color: #666;
-    }
-
-    .fragment.empty::before {
-      content: '?';
-      font-size: 1.5rem;
-      opacity: 0.3;
-    }
-
-    .fragment.empty::before {
-      content: '?';
-      font-size: 1.5rem;
-      opacity: 0.3;
-    }
-
-    .fragment.filled {
-      background: linear-gradient(45deg, #00ff88, #00ffff);
-      color: black;
-      border-color: #00ff88;
-      animation: fragmentGlow 2s ease-in-out infinite alternate;
-      font-size: 0.7rem;
-      text-align: center;
-      padding: 2px;
-    }
-
-    .fragment.faded {
-      background: rgba(128, 128, 128, 0.3);
-      color: #666;
-      border-color: #444;
-      font-size: 0.7rem;
-      text-align: center;
-      padding: 2px;
-      opacity: 0.5;
-    }
-
-    .fragment.filled .fragment-content {
-      font-weight: 900;
-      margin-bottom: 2px;
-      font-size: 0.7rem;
-      line-height: 1.1;
-    }
-
-    .fragment.faded .fragment-content {
-      font-weight: 600;
-      font-size: 0.7rem;
-      line-height: 1.1;
-    }
-
-    .fragment.filled .fragment-submitter {
-      font-size: 0.5rem;
-      color: #003300;
-      font-weight: 600;
-    }
-
-    @keyframes fragmentGlow {
-      0% { box-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
-      100% { box-shadow: 0 0 20px rgba(0, 255, 136, 1); }
-    }
-
-    @keyframes fragmentAppear {
-      0% { 
-        opacity: 0; 
-        transform: scale(0.3) rotate(180deg); 
-        background: linear-gradient(45deg, #ff00ff, #ffff00);
-      }
-      50% { 
-        transform: scale(1.2) rotate(90deg); 
-      }
-      100% { 
-        opacity: 1; 
-        transform: scale(1) rotate(0deg); 
-        background: linear-gradient(45deg, #00ff88, #00ffff);
-      }
-    }
-
-    @keyframes fragmentReveal {
-      0% { 
-        opacity: 0; 
-        transform: scale(0.1) translateY(-20px); 
-        filter: blur(5px);
-      }
-      50% { 
-        transform: scale(1.1) translateY(-5px); 
-        filter: blur(2px);
-      }
-      100% { 
-        opacity: 0.5; 
-        transform: scale(1) translateY(0); 
-        filter: blur(0px);
-      }
-    }
-
-    @keyframes setReveal {
-      0% { 
-        transform: scale(1);
-        box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
-      }
-      25% { 
-        transform: scale(1.05);
-        box-shadow: 0 0 40px rgba(255, 255, 0, 0.6);
-      }
-      50% { 
-        transform: scale(1.02);
-        box-shadow: 0 0 60px rgba(255, 0, 255, 0.8);
-      }
-      75% { 
-        transform: scale(1.03);
-        box-shadow: 0 0 50px rgba(0, 255, 255, 0.7);
-      }
-      100% { 
-        transform: scale(1);
-        box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
-      }
-    }
-
-
-
-    .set-container.complete {
-      border-color: #ffff00;
-      animation: setComplete 2s ease-in-out infinite alternate;
-      background: rgba(255, 255, 0, 0.1);
-    }
-
-    .set-container.complete .set-title {
-      color: #ffff00;
-      text-shadow: 0 0 20px #ffff00;
-      animation: titlePulse 1.5s ease-in-out infinite alternate;
-    }
-
-    @keyframes titlePulse {
-      0% { transform: scale(1); }
-      100% { transform: scale(1.05); }
-    }
-
-    @keyframes setComplete {
-      0% { box-shadow: 0 0 30px rgba(255, 255, 0, 0.5); }
-      100% { box-shadow: 0 0 60px rgba(255, 255, 0, 1); }
-    }
-
-    .set-container.complete .set-title::after {
-      content: ' ✓ COMPLETE';
-      font-size: 0.8rem;
-      color: #00ff00;
-      margin-left: 10px;
-      animation: checkmarkGlow 1s ease-in-out infinite alternate;
-    }
-
-    @keyframes checkmarkGlow {
-      0% { text-shadow: 0 0 10px #00ff00; }
-      100% { text-shadow: 0 0 20px #00ff00; }
-    }
-
-    @keyframes fragmentSort {
-      0% { transform: translateY(-20px); opacity: 0.5; }
-      100% { transform: translateY(0); opacity: 1; }
-    }
-
-    @keyframes setCompleteFlash {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(255, 255, 0, 0.8); }
-      100% { transform: scale(1); }
-    }
-
-    @keyframes discoveryPulse {
-      0% { 
-        transform: scale(1) translateX(-50%);
-        box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
-      }
-      25% { 
-        transform: scale(1.1) translateX(-50%);
-        box-shadow: 0 0 40px rgba(255, 0, 255, 0.8);
-      }
-      50% { 
-        transform: scale(1.05) translateX(-50%);
-        box-shadow: 0 0 60px rgba(255, 0, 255, 1);
-      }
-      75% { 
-        transform: scale(1.02) translateX(-50%);
-        box-shadow: 0 0 50px rgba(255, 0, 255, 0.7);
-      }
-      100% { 
-        transform: scale(1) translateX(-50%);
-        box-shadow: 0 0 30px rgba(255, 0, 255, 0.4);
-      }
-    }
-
-    .completion-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.95);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      backdrop-filter: blur(15px);
-    }
-
-    .completion-overlay.show {
-      display: flex;
-      animation: overlayAppear 2s ease-out;
-    }
-
-    @keyframes overlayAppear {
-      0% { opacity: 0; backdrop-filter: blur(0px); }
-      100% { opacity: 1; backdrop-filter: blur(15px); }
-    }
-
-    .completion-message {
-      text-align: center;
-      max-width: 800px;
-      padding: 60px;
-      background: rgba(0, 0, 0, 0.9);
-      border: 3px solid #ffff00;
-      border-radius: 20px;
-      animation: finalPulse 1s ease-in-out infinite alternate;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .completion-message::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: conic-gradient(from 0deg, transparent, #ffff00, transparent, #ff00ff, transparent, #00ffff, transparent);
-      animation: rotateBackground 4s linear infinite;
-      z-index: -1;
-    }
-
-    .completion-message::after {
-      content: '';
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      right: 3px;
-      bottom: 3px;
-      background: rgba(0, 0, 0, 0.9);
-      border-radius: 17px;
-      z-index: -1;
-    }
-
-    @keyframes rotateBackground {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @keyframes finalPulse {
-      0% { 
-        box-shadow: 0 0 50px rgba(255, 255, 0, 0.5);
-        transform: scale(1);
-      }
-      100% { 
-        box-shadow: 0 0 100px rgba(255, 255, 0, 1);
-        transform: scale(1.02);
-      }
-    }
-
-    .completion-title {
-      font-size: 3.5rem;
-      font-weight: 900;
-      color: #ffff00;
-      margin-bottom: 30px;
-      text-shadow: 0 0 30px #ffff00;
-      animation: titleGlitch 3s ease-in-out infinite;
-    }
-
-    @keyframes titleGlitch {
-      0%, 90%, 100% { 
-        transform: translate(0);
-        filter: hue-rotate(0deg);
-      }
-      10% { 
-        transform: translate(-2px, 2px);
-        filter: hue-rotate(90deg);
-        text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff;
-      }
-      20% { 
-        transform: translate(2px, -2px);
-        filter: hue-rotate(180deg);
-        text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff;
-      }
-    }
-
-    .completion-text {
-      font-size: 1.4rem;
-      color: #00ffff;
-      margin-bottom: 30px;
-      line-height: 1.8;
-      animation: textPulse 2s ease-in-out infinite alternate;
-    }
-
-    @keyframes textPulse {
-      0% { opacity: 0.8; transform: scale(1); }
-      100% { opacity: 1; transform: scale(1.02); }
-    }
-
-    .reboot-sequence {
-      font-size: 2.5rem;
-      color: #ff00ff;
-      margin-top: 30px;
-      animation: rebootAnimation 4s ease-in-out infinite;
-      text-shadow: 0 0 20px #ff00ff;
-    }
-
-    @keyframes rebootAnimation {
-      0% { 
-        opacity: 0;
-        transform: scale(0.8);
-        filter: blur(5px);
-      }
-      25% { 
-        opacity: 1;
-        transform: scale(1.1);
-        filter: blur(0px);
-        color: #ff00ff;
-      }
-      50% { 
-        opacity: 0.8;
-        transform: scale(0.95);
-        color: #00ffff;
-      }
-      75% { 
-        opacity: 1;
-        transform: scale(1.05);
-        color: #ffff00;
-      }
-      100% { 
-        opacity: 0.7;
-        transform: scale(1);
-        filter: blur(2px);
-        color: #ff00ff;
-      }
-    }
-
-    .completion-effects {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .particle {
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      background: #00ffff;
-      border-radius: 50%;
-      animation: particleFloat 6s linear infinite;
-    }
-
-    @keyframes particleFloat {
-      0% {
-        transform: translateY(100vh) scale(0);
-        opacity: 0;
-      }
-      10% {
-        opacity: 1;
-        transform: scale(1);
-      }
-      90% {
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-100px) scale(0);
-        opacity: 0;
-      }
-    }
-
-    @keyframes fadeOut {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(0.8); }
-    }
-
-    @keyframes screenFlash {
-      0% { opacity: 0; }
-      50% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-
-    .status-bar {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.9);
-      border: 2px solid #00ffff;
-      border-radius: 25px;
-      padding: 10px 30px;
-      font-weight: 700;
-      z-index: 100;
-    }
-
-    .glitch {
-      animation: glitch 0.3s ease-in-out infinite;
-    }
-
-    @keyframes glitch {
-      0% { transform: translate(0); }
-      20% { transform: translate(-2px, 2px); }
-      40% { transform: translate(-2px, -2px); }
-      60% { transform: translate(2px, 2px); }
-      80% { transform: translate(2px, -2px); }
-      100% { transform: translate(0); }
-    }
-
-    @media (max-width: 768px) {
-      .title { font-size: 2.5rem; }
-      .reconstruction-grid { grid-template-columns: 1fr; }
-      .fragments { grid-template-columns: repeat(5, 1fr); }
-    }
-  </style>
+  <title>UNDERNET MEMORY RECONSTRUCTOR</title>
+  
 </head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1 class="title">ORPHEUS RECONSTRUCTOR</h1>
-      <p class="subtitle">DATA FRAGMENT ASSEMBLY PROTOCOL</p>
-    </div>
-
+<body class="justify-center text-center items-center align-middle w-screen h-svh flex flex-col bg-sla font-hack text-white">
+  <div class="p-10 bg-slate-700/20 backdrop-blur-xs rounded-2xl outline outline-slate-500">
     <div class="upload-section" id="uploadSection">
       <form class="upload-form" id="uploadForm">
         <div class="form-group">
-          <label for="submitterName">AGENT DESIGNATION:</label>
-          <input type="text" id="submitterName" placeholder="Enter a nickname... This will be public..." required>
+          <label for="submitterName" class="italic text-lg mb-1">name (public)</label>
+          <br>
+          <input type="text" id="submitterName" placeholder="orpheus" required class="bg-slate-700/20 backdrop-blur-xs rounded-full outline outline-slate-500 p-1 px-3 mb-3 bottom-4">
         </div>
         <div class="form-group">
-          <label for="fileUpload">DATA FRAGMENT:</label>
-          <input type="file" id="fileUpload" accept=".txt" required>
+          <label for="fileUpload" class="italic text-lg mb-1">memory fragment</label>
+          <br>
+          <input type="file" id="fileUpload" accept=".txt" required class="file:bg-slate-700/20 file:backdrop-blur-xs file:rounded-full file:outline file:outline-slate-500 file:p-1 file:m-1 file:mr-3 file:px-3 bg-slate-700/10 backdrop-blur-xs rounded-full outline outline-slate-500 p-1 flex align-middle mb-3">
         </div>
-        <button type="submit" class="submit-btn" id="submitBtn">
-          UPLOAD FRAGMENT
+        <button type="submit" id="submitBtn" class="font-bold italic text-2xl bg-slate-700/20 backdrop-blur-xs rounded-full outline outline-slate-500 p-3 px-4 mt-7 hover:bg-blue-600/50 transition-all">
+          RECONSTRUCT MEMORY
         </button>
       </form>
     </div>
 
-    <div class="reconstruction-grid" id="reconstructionGrid">
-      <!-- sets will be dynamically generated -->
-    </div>
+
   </div>
 
-  <div class="status-bar" id="statusBar">
-    AWAITING DATA FRAGMENTS...
+  <div class="status-bar absolute italic bg-slate-700/20 backdrop-blur-xs rounded-full outline outline-slate-500 p-4 bottom-4" id="statusBar">
+    [waiting for fragments]
   </div>
 
-  <div class="completion-overlay" id="completionOverlay">
-    <div class="completion-effects" id="completionEffects"></div>
-    <div class="completion-message">
-      <h2 class="completion-title glitch">RECONSTRUCTION COMPLETE</h2>
-      <p class="completion-text">
-        ORPHEUS PROTOCOL INITIATED<br>
-        SYSTEM REBOOT SEQUENCE ACTIVATED<br>
-        UNDERNET COMING ONLINE...
-      </p>
-      <div class="reboot-sequence">
-        ORPHEUS IS REBOOTING...
-      </div>
-    </div>
-  </div>
+
 
   <script>
     const FRAGMENT_SETS = [
@@ -750,108 +66,8 @@
       });
     }
 
-    function createReconstructionGrid() {
-      const grid = document.getElementById('reconstructionGrid');
-      
-      FRAGMENT_SETS.forEach(setName => {
-        const setContainer = document.createElement('div');
-        setContainer.className = 'set-container';
-        setContainer.id = `set-${setName}`;
-        
-        const setTitle = document.createElement('div');
-        setTitle.className = 'set-title hidden';
-        setTitle.textContent = '???';
-        setTitle.setAttribute('data-original-name', setName);
-        
-        const fragments = document.createElement('div');
-        fragments.className = 'fragments';
-        
-        for (let i = 1; i <= 5; i++) {
-          const fragment = document.createElement('div');
-          fragment.className = 'fragment empty';
-          fragment.id = `${setName}-${i}`;
-          fragments.appendChild(fragment);
-        }
-        
-        setContainer.appendChild(setTitle);
-        setContainer.appendChild(fragments);
-        grid.appendChild(setContainer);
-      });
-    }
 
-    function updateFragment(setName, number, submitter, filename) {
-      const fragmentId = `${setName}-${number}`;
-      const fragment = document.getElementById(fragmentId);
-      
-      if (fragment) {
-        fragment.className = 'fragment filled';
-        
-        fragment.innerHTML = `
-          <div class="fragment-content">${setName}${number} - ${submitter}</div>
-        `;
-        
-        fragment.style.animation = 'fragmentAppear 0.8s ease-out';
-        
-        checkSetCompletion(setName);
-      }    }
-    
-    function revealSetTitle(setName) {
-      const setTitle = document.querySelector(`#set-${setName} .set-title`);
-      if (setTitle && setTitle.classList.contains('hidden')) {
-        const originalName = setTitle.getAttribute('data-original-name');
-        setTitle.textContent = originalName;
-        setTitle.classList.remove('hidden');
-        setTitle.classList.add('revealed');
-        
-        showFadedFragments(setName);
-        
-        setTimeout(() => {
-          setTitle.classList.remove('revealed');
-        }, 1000);
-      }
-    }
-    function showFadedFragments(setName) {
-      const setContainer = document.getElementById(`set-${setName}`);
-      const fragments = setContainer.querySelectorAll('.fragment');
-      
-      fragments.forEach((fragment, index) => {
-        if (fragment.classList.contains('empty')) {
-          const number = index + 1;
-          fragment.className = 'fragment faded';
-          fragment.innerHTML = `
-            <div class="fragment-content">${setName}${number}</div>
-          `;
-          
-          fragment.style.animation = `fragmentReveal 0.6s ease-out ${index * 0.1}s`;
-        }
-      });
-      
-      setContainer.classList.add('set-revealed');
-      setContainer.style.animation = 'setReveal 1.5s ease-out';
-      
-      showSetDiscoveryMessage(setName);
-      
-      setTimeout(() => {
-        setContainer.classList.remove('set-revealed');
-        setContainer.style.animation = '';
-      }, 1500);
-    }
 
-    function showSetDiscoveryMessage(setName) {
-      const statusBar = document.getElementById('statusBar');
-      const originalText = statusBar.textContent;
-      const originalBg = statusBar.style.background;
-      
-      statusBar.textContent = `SET ${setName} DISCOVERED! ALL FRAGMENTS REVEALED!`;
-      statusBar.style.background = 'rgba(255, 0, 255, 0.4)';
-      statusBar.style.animation = 'discoveryPulse 1.5s ease-out';
-      
-      setTimeout(() => {
-        statusBar.style.animation = '';
-        statusBar.style.background = originalBg;
-        updateStatusBar();
-      }, 3000);
-    }
 
     function checkSetCompletion(setName) {
       const setData = reconstructionData[setName];
@@ -904,7 +120,7 @@
       const statusBar = document.getElementById('statusBar');
       const originalBg = statusBar.style.background;
       
-      statusBar.textContent = `SET ${setName} RECONSTRUCTED!`;
+      statusBar.textContent = `{memory ${setName} reconstructed}`;
       statusBar.style.background = 'rgba(255, 255, 0, 0.3)';
       statusBar.style.animation = 'setCompleteFlash 2s ease-out';
       
@@ -919,11 +135,11 @@
       const statusBar = document.getElementById('statusBar');
       
       if (completedSets.length === 0) {
-        statusBar.textContent = 'AWAITING DATA FRAGMENTS...';
+        statusBar.textContent = '[waiting for fragments]';
       } else if (completedSets.length < 3) {
-        statusBar.textContent = `${completedSets.length}/3 SETS COMPLETE: ${completedSets.join(', ')}`;
+        statusBar.textContent = `[${completedSets.length}/3 memories complete: ${completedSets.join(', ')}]`;
       } else {
-        statusBar.textContent = 'INITIATING ORPHEUS PROTOCOL...';
+        statusBar.textContent = '[initiating orpheus protocol...]';
       }
     }
 
@@ -935,40 +151,6 @@
       setTimeout(() => {
         uploadSection.style.display = 'none';
       }, 1000);
-      
-      setTimeout(() => {
-        document.getElementById('completionOverlay').classList.add('show');
-        
-        document.querySelectorAll('.set-container').forEach(container => {
-          container.classList.add('glitch');
-        });
-        
-        createParticleEffects();
-        
-        playCompletionEffects();
-        
-        createScreenFlash();
-        
-      }, 2000);
-    }
-
-    function createParticleEffects() {
-      const effectsContainer = document.getElementById('completionEffects');
-      
-      for (let i = 0; i < 50; i++) {
-        setTimeout(() => {
-          const particle = document.createElement('div');
-          particle.className = 'particle';
-          particle.style.left = Math.random() * 100 + '%';
-          particle.style.animationDelay = Math.random() * 2 + 's';
-          particle.style.background = ['#00ffff', '#ff00ff', '#ffff00'][Math.floor(Math.random() * 3)];
-          effectsContainer.appendChild(particle);
-          
-          setTimeout(() => {
-            particle.remove();
-          }, 6000);
-        }, i * 100);
-      }
     }
 
     function createScreenFlash() {
@@ -986,27 +168,6 @@
       setTimeout(() => {
         flash.remove();
       }, 500);
-    }
-
-    function playCompletionEffects() {
-      const completedContainers = completedSets.map(setName => 
-        document.getElementById(`set-${setName}`)
-      );
-      
-      let flashCount = 0;
-      const flashInterval = setInterval(() => {
-        completedContainers.forEach(container => {
-          container.style.opacity = container.style.opacity === '0.3' ? '1' : '0.3';
-        });
-        
-        flashCount++;
-        if (flashCount > 10) {
-          clearInterval(flashInterval);
-          completedContainers.forEach(container => {
-            container.style.opacity = '1';
-          });
-        }
-      }, 200);
     }
 
     async function handleFileUpload(event) {
@@ -1058,11 +219,7 @@
           timestamp: Date.now()
         };
         
-        if (isFirstFragment) {
-          revealSetTitle(setName);
-        }
-        
-        updateFragment(setName, number, submitterName, file.name);
+
         
         document.getElementById('uploadForm').reset();
         
@@ -1086,19 +243,19 @@
     function showSuccessMessage(message) {
       const statusBar = document.getElementById('statusBar');
       const originalText = statusBar.textContent;
+      const originalBg = statusBar?.style.background
       
       statusBar.textContent = message;
       statusBar.style.background = 'rgba(0, 255, 136, 0.3)';
       
       setTimeout(() => {
         updateStatusBar();
-        statusBar.style.background = 'rgba(0, 0, 0, 0.9)';
+        statusBar.style.background = originalBg;
       }, 3000);
     }
 
     function initialize() {
       initializeReconstructionData();
-      createReconstructionGrid();
       
       document.getElementById('uploadForm').addEventListener('submit', handleFileUpload);
       
