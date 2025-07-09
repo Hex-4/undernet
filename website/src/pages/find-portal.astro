@@ -9,15 +9,15 @@ import './src/styles/global.css'
     
     let videoElem = document.getElementById("webcam")
 
-
+    var audio = new Audio('https://hc-cdn.hel1.your-objectstorage.com/s/v3/da4cd6baf761a36cdfc7df9b48c5a4c137e0104b_qr-sound_audio.mp4');
     
     const qrHashes = [
-    "4f98f352df1e6f3931e67c02559850621ffe47788530fc011908d3d58f4c69fc","ee449262c87003a0d0fe2e04210dc132d910f6cb75f33ed7cc7552981cb592ec","4e2751e77ac8144152a2b9307debc194775e376fb25257c89f21de5a336dfcd7","65a5cc1dc19611426eb836d84f5a588dedd48606c16fe40b7fc9f0e595d9168b","dc63ce85acd5c0da62092339dd4882daa2ecc53c96d056d0a5303884fe314dcc",
+    "4f98f352df1e6f3931e67c02559850621ffe47788530fc011908d3d58f4c69fc","ee449262c87003a0d0fe2e04210dc132d910f6cb75f33ed7cc7552981cb592ec","4e2751e77ac8144152a2b9307debc194775e376fb25257c89f21de5a336dfcd7","65a5cc1dc19611426eb836d84f5a588dedd48606c16fe40b7fc9f0e595d9168b","249ed70252b0c3264020354f699b60a8c21339f4a730c24a116c0640da3c97ae", // HASH OF NEXT WEBPAGE. QR CODE'S CONTENT MUST BE THE REVERSE OF THIS HASH.
     ]
 
     const hints = [
         "somewhere, lol.",
-        "somewhere else i think :3 :3 :3 :3 :3",
+        "somewhere else i think :3",
         "i forgor :skull:",
         "on planet Earth",
         "why are you asking meeeeeeeeeeeeeee?"
@@ -35,9 +35,11 @@ import './src/styles/global.css'
             current_qr++
             document.getElementById("status").innerText = (current_qr).toString() + document.getElementById("status").innerText.substring(1)
             hint.innerText = hints[current_qr]
-            var audio = new Audio('https://hc-cdn.hel1.your-objectstorage.com/s/v3/da4cd6baf761a36cdfc7df9b48c5a4c137e0104b_qr-sound_audio.mp4');
+            
             audio.play();
-
+            if (current_qr == 5) {
+                window.location.href = result.data
+            }
         }
     }
     
