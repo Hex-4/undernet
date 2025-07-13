@@ -61,7 +61,8 @@ import '../styles/global.css'
       FRAGMENT_SETS.forEach(setName => {
         reconstructionData[setName] = {
           fragments: {},
-          complete: false
+          complete: false,
+          originComputer: null // Track which computer submitted the first fragment
         };
       });
     }
@@ -69,11 +70,49 @@ import '../styles/global.css'
 
 
 
+    // Function to generate a computer fingerprint
+    function getComputerFingerprint() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.textBaseline = 'top';
+      ctx.font = '14px Arial';
+      ctx.fillText('Computer fingerprint', 2, 2);
+      
+      const fingerprint = [
+        navigator.userAgent,
+        navigator.language,
+        screen.width + 'x' + screen.height,
+        new Date().getTimezoneOffset(),
+        canvas.toDataURL()
+      ].join('|');
+      
+      // Create a simple hash
+      let hash = 0;
+      for (let i = 0; i < fingerprint.length; i++) {
+        const char = fingerprint.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32-bit integer
+      }
+      return Math.abs(hash).toString(16);
+    }
+
     function checkSetCompletion(setName) {
       const setData = reconstructionData[setName];
       const fragmentCount = Object.keys(setData.fragments).length;
       
       if (fragmentCount === 5 && !setData.complete) {
+        // Double-check that all fragments are from the same computer
+        const fragments = Object.values(setData.fragments);
+        const firstFingerprint = fragments[0].computerFingerprint;
+        const allFromSameComputer = fragments.every(fragment => 
+          fragment.computerFingerprint === firstFingerprint
+        );
+        
+        if (!allFromSameComputer) {
+          alert('Error: these five memories do not match.');
+          return;
+        }
+        
         setData.complete = true;
         completedSets.push(setName);
         
@@ -211,19 +250,36 @@ import '../styles/global.css'
           return;
         }
         
-        const isFirstFragment = Object.keys(reconstructionData[setName].fragments).length === 0;
+        const computerFingerprint = getComputerFingerprint();
+        const setData = reconstructionData[setName];
         
-        reconstructionData[setName].fragments[number] = {
+        // Check if this is the first fragment for this set
+        const isFirstFragment = Object.keys(setData.fragments).length === 0;
+        
+        if (isFirstFragment) {
+          // Set the origin computer for this set
+          setData.originComputer = computerFingerprint;
+        } else {
+          // Check if this fragment comes from the same computer
+          if (setData.originComputer !== computerFingerprint) {
+            alert('Error: these five memories do not match.');
+            return;
+          }
+        }
+         reconstructionData[setName].fragments[number] = {
           submitter: submitterName,
           filename: file.name,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          computerFingerprint: computerFingerprint
         };
-        
 
         
         document.getElementById('uploadForm').reset();
         
         showSuccessMessage(`FRAGMENT ${setName}${number} ACCEPTED - AGENT ${submitterName}`);
+        
+        // Check if this set is now complete
+        checkSetCompletion(setName);
         
       } catch (error) {
         console.error('Upload error:', error);
