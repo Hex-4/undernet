@@ -67,14 +67,21 @@ export async function GET({ params, request }) {
 
 export async function POST({ params, request }) {
   try {
+    console.log('POST request received');
+    console.log('Headers:', Object.fromEntries(request.headers.entries()));
+    
     let requestBody;
     
     // Handle different content types and empty bodies
     const contentType = request.headers.get('content-type') || '';
+    console.log('Content-Type:', contentType);
     
     if (contentType.includes('application/json')) {
       const bodyText = await request.text();
+      console.log('Raw body text:', bodyText);
+      
       if (!bodyText.trim()) {
+        console.log('Empty request body detected');
         return new Response(JSON.stringify({ error: 'Empty request body' }), {
           status: 400,
           headers: {
@@ -86,7 +93,9 @@ export async function POST({ params, request }) {
       
       try {
         requestBody = JSON.parse(bodyText);
+        console.log('Parsed request body:', requestBody);
       } catch (parseError) {
+        console.log('JSON parse error:', parseError);
         return new Response(JSON.stringify({ error: 'Invalid JSON in request body', details: parseError.message }), {
           status: 400,
           headers: {
@@ -96,6 +105,7 @@ export async function POST({ params, request }) {
         });
       }
     } else {
+      console.log('Invalid content type:', contentType);
       return new Response(JSON.stringify({ error: 'Content-Type must be application/json' }), {
         status: 400,
         headers: {
@@ -106,8 +116,10 @@ export async function POST({ params, request }) {
     }
     
     const { groupName, completedBy } = requestBody;
+    console.log('Extracted fields:', { groupName, completedBy });
     
     if (!groupName || !completedBy) {
+      console.log('Missing required fields');
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400,
         headers: {
@@ -118,6 +130,7 @@ export async function POST({ params, request }) {
     }
 
     const dbPath = getDbPath();
+    console.log('Database path:', dbPath);
 
     // Read existing data
     let existingData = 'group_name,completed_by,completion_time\n';

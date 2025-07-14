@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@astrojs/vercel": "^8.2.1",
+    "@prisma/client": "^6.11.1",
     "@tailwindcss/vite": "^4.1.11",
     "astro": "^5.11.0",
     "js-sha256": "^0.11.1",
+    "prisma": "^6.11.1",
     "qr-scanner": "^1.4.2",
     "sha.js": "^2.4.12",
     "tailwindcss": "^4.1.11"
