@@ -1,0 +1,386 @@
+---
+import '../styles/global.css'
+---
+
+<style>
+  body {
+    background: oklch(12.9% 0.042 264.695);
+    background-image: radial-gradient(oklch(27.9% 0.041 260.031) 2px, transparent 0);
+    background-size: 40px 40px;
+    background-position: -19px -19px;
+  }
+  
+  .memory-display {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin: 40px 0;
+    max-width: 1200px;
+  }
+  
+  .memory-box {
+    aspect-ratio: 1;
+    border: 3px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.5s ease;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .memory-box.filled {
+    border-color: rgba(0, 255, 136, 0.8);
+    background: rgba(0, 255, 136, 0.1);
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+    animation: memoryGlow 2s infinite alternate;
+  }
+  
+  @keyframes memoryGlow {
+    from { box-shadow: 0 0 30px rgba(0, 255, 136, 0.3); }
+    to { box-shadow: 0 0 50px rgba(0, 255, 136, 0.5); }
+  }
+  
+  .memory-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #00ff88;
+    text-shadow: 0 0 10px #00ff88;
+    margin-bottom: 15px;
+  }
+  
+  .memory-team {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-style: italic;
+  }
+  
+  .empty-slot {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.3);
+    font-style: italic;
+  }
+  
+  /* Countdown styles */
+  .countdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #111111 100%);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    font-family: 'Courier New', monospace;
+  }
+  
+  .countdown-timer {
+    font-size: 8rem;
+    font-weight: bold;
+    color: #ff4444;
+    text-shadow: 0 0 30px #ff4444;
+    margin: 30px 0;
+    animation: countdownPulse 1s infinite;
+  }
+  
+  @keyframes countdownPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+  }
+  
+  .countdown-text {
+    font-size: 2.5rem;
+    color: #00ff88;
+    text-shadow: 0 0 20px #00ff88;
+    text-align: center;
+    margin: 20px 0;
+    animation: textFlicker 0.5s infinite alternate;
+  }
+  
+  @keyframes textFlicker {
+    from { opacity: 1; }
+    to { opacity: 0.7; }
+  }
+  
+  .system-status {
+    font-size: 1.5rem;
+    color: #ffaa00;
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+  }
+  
+  .progress-bar {
+    width: 500px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #00ff88;
+    border-radius: 10px;
+    margin: 20px 0;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00ff88, #00aa66);
+    width: 0%;
+    transition: width 1s ease;
+    box-shadow: 0 0 20px #00ff88;
+  }
+  
+  .final-message {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #00ff88;
+    text-shadow: 0 0 40px #00ff88;
+    animation: finalGlow 2s infinite alternate;
+    display: none;
+  }
+  
+  @keyframes finalGlow {
+    from { 
+      transform: scale(1);
+      text-shadow: 0 0 40px #00ff88;
+    }
+    to { 
+      transform: scale(1.05);
+      text-shadow: 0 0 60px #00ff88, 0 0 80px #00ff88;
+    }
+  }
+</style>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEMORY RECOVERY DISPLAY</title>
+</head>
+<body class="justify-center text-center items-center align-middle w-screen h-svh flex flex-col bg-sla font-hack text-white">
+  
+  <!-- Main Display -->
+  <div id="mainDisplay" class="p-10">
+    <h1 class="text-4xl font-bold mb-8">MEMORY RECOVERY STATUS</h1>
+    
+    <div class="memory-display" id="memoryDisplay">
+      <div class="memory-box" id="memory1">
+        <div class="empty-slot">AWAITING RECOVERY...</div>
+      </div>
+      <div class="memory-box" id="memory2">
+        <div class="empty-slot">AWAITING RECOVERY...</div>
+      </div>
+      <div class="memory-box" id="memory3">
+        <div class="empty-slot">AWAITING RECOVERY...</div>
+      </div>
+    </div>
+    
+    <div class="text-xl italic mt-8" id="statusText">
+      No memories recovered yet...
+    </div>
+  </div>
+  
+  <!-- Countdown Overlay -->
+  <div class="countdown-overlay" id="countdownOverlay">
+    <div class="countdown-text" id="countdownText">INITIATING ORPHEUS REBOOT SEQUENCE</div>
+    <div class="countdown-timer" id="countdownTimer">60</div>
+    <div class="system-status" id="systemStatus">PREPARING SYSTEMS...</div>
+    
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    
+    <div class="final-message" id="finalMessage">ORPHEUS ONLINE</div>
+  </div>
+
+  <script>
+    let recoveredMemories = [];
+    let countdownActive = false;
+    
+    // Load recovered memories
+    async function loadRecoveredMemories() {
+      try {
+        const response = await fetch('/api/database?' + Date.now());
+        const data = await response.json();
+        const completedData = parseCSV(data.data);
+        const completed = completedData.filter(group => group.group_name && group.group_name !== 'group_name');
+        
+        // Check if we need to start countdown
+        if (completed.length >= 3 && !countdownActive) {
+          startCountdown();
+          return;
+        }
+        
+        // Update display if countdown hasn't started
+        if (!countdownActive) {
+          updateMemoryDisplay(completed);
+        }
+        
+      } catch (error) {
+        console.error('Failed to load memories:', error);
+      }
+    }
+    
+    function parseCSV(csvText) {
+      const lines = csvText.trim().split('\n');
+      if (lines.length <= 1) return [];
+      
+      const headers = lines[0].split(',');
+      return lines.slice(1).map(line => {
+        const values = parseCSVLine(line);
+        const obj = {};
+        headers.forEach((header, index) => {
+          obj[header] = values[index] || '';
+        });
+        return obj;
+      });
+    }
+    
+    function parseCSVLine(line) {
+      const values = [];
+      let current = '';
+      let inQuotes = false;
+      
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          values.push(current);
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      values.push(current);
+      return values;
+    }
+    
+    function updateMemoryDisplay(memories) {
+      const memoryBoxes = ['memory1', 'memory2', 'memory3'];
+      const statusText = document.getElementById('statusText');
+      
+      // Clear all boxes first
+      memoryBoxes.forEach((boxId, index) => {
+        const box = document.getElementById(boxId);
+        box.className = 'memory-box';
+        box.innerHTML = '<div class="empty-slot">AWAITING RECOVERY...</div>';
+      });
+      
+      // Fill boxes with recovered memories
+      memories.slice(0, 3).forEach((memory, index) => {
+        const box = document.getElementById(memoryBoxes[index]);
+        box.className = 'memory-box filled';
+        box.innerHTML = `
+          <div class="memory-title">${memory.group_name}</div>
+          <div class="memory-team">${memory.completed_by}</div>
+        `;
+      });
+      
+      // Update status text
+      if (memories.length === 0) {
+        statusText.textContent = 'No memories recovered yet...';
+      } else if (memories.length < 3) {
+        statusText.textContent = `${memories.length}/3 memories recovered`;
+      } else {
+        statusText.textContent = 'All required memories recovered!';
+      }
+    }
+    
+    function startCountdown() {
+      if (countdownActive) return;
+      countdownActive = true;
+      
+      const mainDisplay = document.getElementById('mainDisplay');
+      const countdownOverlay = document.getElementById('countdownOverlay');
+      const countdownTimer = document.getElementById('countdownTimer');
+      const countdownText = document.getElementById('countdownText');
+      const systemStatus = document.getElementById('systemStatus');
+      const progressFill = document.getElementById('progressFill');
+      const finalMessage = document.getElementById('finalMessage');
+      
+      // Hide main display and show countdown
+      mainDisplay.style.display = 'none';
+      countdownOverlay.style.display = 'flex';
+      
+      let timeLeft = 60;
+      let currentPhase = 0;
+      
+      const phases = [
+        { text: "INITIATING ORPHEUS REBOOT SEQUENCE", status: "PREPARING SYSTEMS..." },
+        { text: "REBOOTING ORPHEUS", status: "SHUTTING DOWN PREVIOUS INSTANCE..." },
+        { text: "RECOVERING CORE MEMORIES", status: "ACCESSING MEMORY BANKS..." },
+        { text: "RESTORING VISION SYSTEMS", status: "CALIBRATING OPTICAL SENSORS..." },
+        { text: "REESTABLISHING NEURAL NETWORKS", status: "CONNECTING SYNAPTIC PATHWAYS..." },
+        { text: "LOADING PERSONALITY MATRIX", status: "INITIALIZING CONSCIOUSNESS..." },
+        { text: "FINAL SYSTEM CHECKS", status: "RUNNING DIAGNOSTICS..." },
+        { text: "ORPHEUS REVIVAL COMPLETE", status: "ALL SYSTEMS NOMINAL" }
+      ];
+      
+      const countdown = setInterval(() => {
+        countdownTimer.textContent = timeLeft;
+        
+        // Update progress bar
+        const progress = ((60 - timeLeft) / 60) * 100;
+        progressFill.style.width = progress + '%';
+        
+        // Change phases based on time
+        const phaseIndex = Math.floor(((60 - timeLeft) / 60) * phases.length);
+        if (phaseIndex !== currentPhase && phaseIndex < phases.length) {
+          currentPhase = phaseIndex;
+          countdownText.textContent = phases[phaseIndex].text;
+          systemStatus.textContent = phases[phaseIndex].status;
+        }
+        
+        // Special effects at certain points
+        if (timeLeft === 45) {
+          systemStatus.textContent = "ERROR: MEMORY CORRUPTION DETECTED";
+          systemStatus.style.color = "#ff4444";
+          setTimeout(() => {
+            systemStatus.style.color = "#ffaa00";
+            systemStatus.textContent = "CORRUPTION BYPASSED - CONTINUING...";
+          }, 2000);
+        }
+        
+        if (timeLeft === 20) {
+          countdownText.style.color = "#ffaa00";
+          systemStatus.textContent = "WARNING: LOW POWER - SWITCHING TO BACKUP";
+        }
+        
+        if (timeLeft === 10) {
+          countdownText.style.color = "#00ff88";
+          countdownTimer.style.color = "#00ff88";
+        }
+        
+        if (timeLeft <= 0) {
+          clearInterval(countdown);
+          
+          // Hide countdown elements
+          countdownText.style.display = 'none';
+          countdownTimer.style.display = 'none';
+          systemStatus.style.display = 'none';
+          document.querySelector('.progress-bar').style.display = 'none';
+          
+          // Show final message
+          finalMessage.style.display = 'block';
+          
+          // After 5 seconds, redirect or reset
+          setTimeout(() => {
+            location.reload(); // Reset the display
+          }, 5000);
+        }
+        
+        timeLeft--;
+      }, 1000);
+    }
+    
+    // Initialize and set up polling
+    loadRecoveredMemories();
+    setInterval(loadRecoveredMemories, 5000); // Check every 5 seconds
+  </script>
+</body>
+</html>

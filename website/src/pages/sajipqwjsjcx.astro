@@ -1,0 +1,363 @@
+---
+import '../styles/global.css'
+
+const ADMIN_PASSWORD = import.meta.env.ADMIN_PASSWORD || 'ORPHEUSISVERYSIGMA12ka0So';
+---
+
+<style>
+  body {
+    background: oklch(12.9% 0.042 264.695);
+    background-image: radial-gradient(oklch(27.9% 0.041 260.031) 2px, transparent 0);
+    background-size: 40px 40px;
+    background-position: -19px -19px;
+  }
+  
+  .admin-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+  }
+  
+  .group-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+  
+  .group-card.completed {
+    border-color: rgba(0, 255, 136, 0.6);
+    background: rgba(0, 255, 136, 0.1);
+  }
+  
+  .complete-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 5px;
+  }
+  
+  .complete-btn:hover {
+    background: rgba(0, 255, 136, 0.3);
+    border-color: rgba(0, 255, 136, 0.6);
+  }
+  
+  .remove-btn {
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 5px;
+  }
+  
+  .remove-btn:hover {
+    background: rgba(255, 0, 0, 0.3);
+    border-color: rgba(255, 0, 0, 0.6);
+  }
+  
+  .login-form {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  .status-message {
+    padding: 10px;
+    border-radius: 10px;
+    margin: 10px 0;
+    text-align: center;
+  }
+  
+  .status-success {
+    background: rgba(0, 255, 136, 0.2);
+    border: 1px solid rgba(0, 255, 136, 0.4);
+  }
+  
+  .status-error {
+    background: rgba(255, 0, 0, 0.2);
+    border: 1px solid rgba(255, 0, 0, 0.4);
+  }
+</style>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UNDERNET ADMIN PORTAL</title>
+</head>
+<body class="justify-center text-center items-center align-middle w-screen h-svh flex flex-col bg-sla font-hack text-white">
+  
+  <div class="p-10 bg-slate-700/20 backdrop-blur-xs rounded-2xl outline outline-slate-500" style="min-width: 600px;">
+    
+    <!-- Login Form (shown by default) -->
+    <div id="loginSection" class="login-form">
+      <h1 class="text-2xl font-bold mb-6">ADMIN ACCESS REQUIRED</h1>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="adminPassword" class="italic text-lg mb-1">admin password</label>
+          <br>
+          <input type="password" id="adminPassword" placeholder="enter password" required class="bg-slate-700/20 backdrop-blur-xs rounded-full outline outline-slate-500 p-1 px-3 mb-3 w-full">
+        </div>
+        
+        <button type="submit" class="font-bold italic text-xl bg-slate-700/20 backdrop-blur-xs rounded-full outline outline-slate-500 p-3 px-4 mt-4 hover:bg-blue-600/50 transition-all">
+          ACCESS ADMIN PANEL
+        </button>
+      </form>
+      
+      <div id="loginStatus"></div>
+    </div>
+    
+    <!-- Admin Panel (hidden by default) -->
+    <div id="adminPanel" style="display: none;">
+      <h1 class="text-2xl font-bold mb-6">MEMORY GROUP ADMIN</h1>
+      
+      <div class="admin-grid" id="groupGrid">
+        <!-- Groups will be populated here -->
+      </div>
+      
+      <div id="adminStatus"></div>
+      
+      <button id="logoutBtn" class="font-bold italic text-lg bg-red-700/20 backdrop-blur-xs rounded-full outline outline-red-500 p-2 px-4 mt-6 hover:bg-red-600/50 transition-all">
+        LOGOUT
+      </button>
+    </div>
+  </div>
+
+  <div class="status-bar absolute italic bg-slate-700/20 backdrop-blur-xs rounded-full outline outline-slate-500 p-4 bottom-4" id="statusBar">
+    [admin portal]
+  </div>
+
+  <script>
+    const _0xadmin = ['VIRAL', 'BUILD', 'SAIL', 'DREAM', 'LIVE', 'DESIGN', 'HIKE', 'ADVENTURE'];
+    let _0xcompletedGroups = [];
+    
+    // Check admin authentication
+    let _0xisAuthenticated = sessionStorage.getItem('adminAuth') === 'true';
+    
+    if (_0xisAuthenticated) {
+      showAdminPanel();
+    }
+    
+    // Login form handler
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const password = document.getElementById('adminPassword').value;
+      const statusDiv = document.getElementById('loginStatus');
+      
+      try {
+        const response = await fetch('/api/admin-auth', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ password })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+          sessionStorage.setItem('adminAuth', 'true');
+          statusDiv.innerHTML = '<div class="status-success">Access granted!</div>';
+          setTimeout(showAdminPanel, 1000);
+        } else {
+          statusDiv.innerHTML = '<div class="status-error">Invalid password</div>';
+        }
+      } catch (error) {
+        statusDiv.innerHTML = '<div class="status-error">Authentication failed</div>';
+      }
+    });
+    
+    // Logout handler
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      sessionStorage.removeItem('adminAuth');
+      document.getElementById('loginSection').style.display = 'block';
+      document.getElementById('adminPanel').style.display = 'none';
+      document.getElementById('adminPassword').value = '';
+      document.getElementById('loginStatus').innerHTML = '';
+    });
+    
+    function showAdminPanel() {
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      loadAdminData();
+    }
+    
+    async function loadAdminData() {
+      try {
+        // Load completed groups
+        const response = await fetch('/api/database?' + Date.now());
+        const data = await response.json();
+        const completedData = parseCSV(data.data);
+        _0xcompletedGroups = completedData.filter(group => group.group_name && group.group_name !== 'group_name');
+        
+        updateGroupGrid();
+      } catch (error) {
+        console.error('Failed to load admin data:', error);
+      }
+    }
+    
+    function parseCSV(csvText) {
+      const lines = csvText.trim().split('\n');
+      const headers = lines[0].split(',');
+      return lines.slice(1).map(line => {
+        const values = parseCSVLine(line);
+        const obj = {};
+        headers.forEach((header, index) => {
+          obj[header] = values[index] || '';
+        });
+        return obj;
+      });
+    }
+    
+    function parseCSVLine(line) {
+      const values = [];
+      let current = '';
+      let inQuotes = false;
+      
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          values.push(current);
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      values.push(current);
+      return values;
+    }
+    
+    function updateGroupGrid() {
+      const grid = document.getElementById('groupGrid');
+      grid.innerHTML = '';
+      
+      _0xadmin.forEach(groupName => {
+        const isCompleted = _0xcompletedGroups.some(g => g.group_name === groupName);
+        
+        const card = document.createElement('div');
+        card.className = `group-card ${isCompleted ? 'completed' : ''}`;
+        
+        const completedInfo = isCompleted 
+          ? _0xcompletedGroups.find(g => g.group_name === groupName)
+          : null;
+        
+        card.innerHTML = `
+          <h3 class="text-xl font-bold mb-2">${groupName}</h3>
+          <p class="text-sm mb-2">${isCompleted ? '✅ COMPLETED' : '⏳ PENDING'}</p>
+          ${completedInfo ? `
+            <p class="text-xs mb-2">By: ${completedInfo.completed_by}</p>
+          ` : ''}
+          <div>
+            ${!isCompleted ? `
+              <button class="complete-btn" onclick="markGroupComplete('${groupName}')">
+                MARK COMPLETE
+              </button>
+            ` : `
+              <button class="remove-btn" onclick="removeGroupCompletion('${groupName}')">
+                REMOVE COMPLETION
+              </button>
+            `}
+          </div>
+        `;
+        
+        grid.appendChild(card);
+      });
+      
+      // Update status bar
+      document.getElementById('statusBar').textContent = `[${_0xcompletedGroups.length}/8 groups completed]`;
+    }
+    
+    async function markGroupComplete(groupName) {
+      const statusDiv = document.getElementById('adminStatus');
+      statusDiv.innerHTML = '<div class="status-message">Marking complete...</div>';
+      
+      try {
+        const response = await fetch('/api/database', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            groupName: groupName,
+            completedBy: 'ADMIN'
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+          statusDiv.innerHTML = `<div class="status-success">${groupName} marked as complete!</div>`;
+          await loadAdminData(); // Reload data
+          
+          setTimeout(() => {
+            statusDiv.innerHTML = '';
+          }, 3000);
+        } else {
+          statusDiv.innerHTML = `<div class="status-error">Failed to mark ${groupName}: ${result.error || 'Unknown error'}</div>`;
+        }
+      } catch (error) {
+        console.error('Failed to mark group complete:', error);
+        statusDiv.innerHTML = '<div class="status-error">Network error occurred</div>';
+      }
+    }
+    
+    async function removeGroupCompletion(groupName) {
+      const statusDiv = document.getElementById('adminStatus');
+      statusDiv.innerHTML = '<div class="status-message">Removing completion...</div>';
+      
+      try {
+        const response = await fetch('/api/database', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            groupName: groupName
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+          statusDiv.innerHTML = `<div class="status-success">${groupName} completion removed!</div>`;
+          await loadAdminData(); // Reload data
+          
+          setTimeout(() => {
+            statusDiv.innerHTML = '';
+          }, 3000);
+        } else {
+          statusDiv.innerHTML = `<div class="status-error">Failed to remove ${groupName}: ${result.error || 'Unknown error'}</div>`;
+        }
+      } catch (error) {
+        console.error('Failed to remove group completion:', error);
+        statusDiv.innerHTML = '<div class="status-error">Network error occurred</div>';
+      }
+    }
+    
+    // Make functions globally available
+    window.markGroupComplete = markGroupComplete;
+    window.removeGroupCompletion = removeGroupCompletion;
+    
+    // Auto-refresh every 10 seconds
+    setInterval(() => {
+      if (_0xisAuthenticated && document.getElementById('adminPanel').style.display !== 'none') {
+        loadAdminData();
+      }
+    }, 10000);
+  </script>
+</body>
+</html>

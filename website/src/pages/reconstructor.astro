@@ -9,6 +9,61 @@ import '../styles/global.css'
     background-size: 40px 40px;
     background-position: -19px -19px;
   }
+  
+  .progress-popup {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 255, 136, 0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 15px 25px;
+    color: white;
+    font-weight: bold;
+    z-index: 1000;
+    animation: popupSlide 0.5s ease-out;
+  }
+  
+  @keyframes popupSlide {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+  
+  .file-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+  }
+  
+  .file-slot {
+    aspect-ratio: 1;
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .file-slot.filled {
+    border-color: rgba(0, 255, 136, 0.6);
+    background: rgba(0, 255, 136, 0.1);
+  }
+  
+  .file-slot.error {
+    border-color: rgba(255, 0, 0, 0.6);
+    background: rgba(255, 0, 0, 0.1);
+  }
 </style>
 
 <!DOCTYPE html>
@@ -17,308 +72,441 @@ import '../styles/global.css'
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UNDERNET MEMORY RECONSTRUCTOR</title>
-  
 </head>
 <body class="justify-center text-center items-center align-middle w-screen h-svh flex flex-col bg-sla font-hack text-white">
+  
+  <!-- Progress Popup (hidden by default) -->
+  <div id="progressPopup" class="progress-popup" style="display: none;"></div>
+  
   <div class="p-10 bg-slate-700/20 backdrop-blur-xs rounded-2xl outline outline-slate-500">
     <div class="upload-section" id="uploadSection">
+      <h1 class="text-2xl font-bold mb-6">MEMORY RECONSTRUCTOR</h1>
+      
       <form class="upload-form" id="uploadForm">
         <div class="form-group">
-          <label for="submitterName" class="italic text-lg mb-1">name (public)</label>
+          <label for="submitterName" class="italic text-lg mb-1">names of group members (public)</label>
           <br>
-          <input type="text" id="submitterName" placeholder="orpheus" required class="bg-slate-700/20 backdrop-blur-xs rounded-full outline outline-slate-500 p-1 px-3 mb-3 bottom-4">
+          <input type="text" id="submitterName" placeholder="orpheus" required class="bg-slate-700/20 backdrop-blur-xs rounded-full outline outline-slate-500 p-1 px-3 mb-3">
         </div>
+        
         <div class="form-group">
-          <label for="fileUpload" class="italic text-lg mb-1">memory fragment</label>
+          <label for="fileUpload" class="italic text-lg mb-1">upload 5 memory fragments</label>
           <br>
-          <input type="file" id="fileUpload" accept=".txt" required class="file:bg-slate-700/20 file:backdrop-blur-xs file:rounded-full file:outline file:outline-slate-500 file:p-1 file:m-1 file:mr-3 file:px-3 bg-slate-700/10 backdrop-blur-xs rounded-full outline outline-slate-500 p-1 flex align-middle mb-3">
+          <input type="file" id="fileUpload" accept=".txt" multiple required class="file:bg-slate-700/20 file:backdrop-blur-xs file:rounded-full file:outline file:outline-slate-500 file:p-1 file:m-1 file:mr-3 file:px-3 bg-slate-700/10 backdrop-blur-xs rounded-full outline outline-slate-500 p-1 flex align-middle mb-3">
         </div>
+        
+        <div class="file-grid" id="fileGrid">
+          <div class="file-slot">1</div>
+          <div class="file-slot">2</div>
+          <div class="file-slot">3</div>
+          <div class="file-slot">4</div>
+          <div class="file-slot">5</div>
+        </div>
+        
         <button type="submit" id="submitBtn" class="font-bold italic text-2xl bg-slate-700/20 backdrop-blur-xs rounded-full outline outline-slate-500 p-3 px-4 mt-7 hover:bg-blue-600/50 transition-all">
           RECONSTRUCT MEMORY
         </button>
       </form>
     </div>
-
-
   </div>
 
   <div class="status-bar absolute italic bg-slate-700/20 backdrop-blur-xs rounded-full outline outline-slate-500 p-4 bottom-4" id="statusBar">
     [waiting for fragments]
   </div>
 
-
-
   <script>
-    const FRAGMENT_SETS = [
-      'VIRAL', 'DREAM', 'DESIGN', 'LIVE', 'SAIL', 'ADVENTURE', 'HIKE', 'BUILD'
-    ];
-
-    let reconstructionData = {};
-    let completedSets = [];
-    let submissionsLocked = false;
-
-    function initializeReconstructionData() {
-      FRAGMENT_SETS.forEach(setName => {
-        reconstructionData[setName] = {
-          fragments: {},
-          complete: false,
-          originComputer: null // Track which computer submitted the first fragment
-        };
-      });
-    }
-
-
-
-
-    // Function to generate a computer fingerprint
-    function getComputerFingerprint() {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      ctx.textBaseline = 'top';
-      ctx.font = '14px Arial';
-      ctx.fillText('Computer fingerprint', 2, 2);
-      
-      const fingerprint = [
-        navigator.userAgent,
-        navigator.language,
-        screen.width + 'x' + screen.height,
-        new Date().getTimezoneOffset(),
-        canvas.toDataURL()
-      ].join('|');
-      
-      // Create a simple hash
-      let hash = 0;
-      for (let i = 0; i < fingerprint.length; i++) {
-        const char = fingerprint.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32-bit integer
+    // Obfuscated key and constants
+    const _0x4f8e = atob('T1JQSEVVU0ZVUlJZ');
+    const _0x1a2b = ['VIRAL', 'BUILD', 'SAIL', 'DREAM', 'LIVE', 'DESIGN', 'HIKE', 'ADVENTURE'];
+    const _0x3c4d = 'encrypted_memories.csv';
+    
+    let _0x5e6f = [];
+    let _0x7g8h = null;
+    let _0x9i0j = [];
+    
+    // Load CSV databases
+    async function _0x11kl() {
+      try {
+        // Load memory database
+        const _0x22mn = await fetch('/' + _0x3c4d);
+        const _0x33op = await _0x22mn.text();
+        _0x7g8h = _0x44qr(_0x33op);
+        
+        // Load completed groups
+        await _0x55st();
+        
+        // Update progress display
+        _0x66uv();
+        
+        // Start periodic checking for updates
+        setInterval(_0x55st, 5000);
+      } catch (_0x77wx) {
+        console.error('Failed to load databases:', _0x77wx);
       }
-      return Math.abs(hash).toString(16);
     }
-
-    function checkSetCompletion(setName) {
-      const setData = reconstructionData[setName];
-      const fragmentCount = Object.keys(setData.fragments).length;
-      
-      if (fragmentCount === 5 && !setData.complete) {
-        // Double-check that all fragments are from the same computer
-        const fragments = Object.values(setData.fragments);
-        const firstFingerprint = fragments[0].computerFingerprint;
-        const allFromSameComputer = fragments.every(fragment => 
-          fragment.computerFingerprint === firstFingerprint
+    
+    async function _0x55st() {
+      try {
+        const _0x88yz = await fetch('/api/database?' + Date.now());
+        const _0x99ab = await _0x88yz.json();
+        const _0xaacd = _0x44qr(_0x99ab.data);
+        const _0xbbef = _0xaacd.filter(_0xccgh => _0xccgh.group_name && _0xccgh.group_name !== 'group_name');
+        
+        // Check for new completions
+        const _0xddij = _0xbbef.filter(_0xccgh => 
+          !_0x9i0j.some(_0xeekl => _0xeekl.group_name === _0xccgh.group_name)
         );
         
-        if (!allFromSameComputer) {
-          alert('Error: these five memories do not match.');
-          return;
-        }
+        _0x9i0j = _0xbbef;
         
-        setData.complete = true;
-        completedSets.push(setName);
+        // Show popup for new completions
+        _0xddij.forEach(_0xccgh => {
+          _0xffmn(_0xccgh.group_name);
+        });
         
-        const setContainer = document.getElementById(`set-${setName}`);
-        setContainer.classList.add('complete');
-        
-        sortFragmentsInSet(setName);
-        
-        showSetCompletionMessage(setName);
-        
-        updateStatusBar();
-        
-        if (completedSets.length >= 3) {
-          setTimeout(() => {
-            triggerFinalSequence();
-          }, 2000);
-        }
+        _0x66uv();
+      } catch (_0x77wx) {
+        console.error('Failed to load completed groups:', _0x77wx);
       }
     }
-
-    function sortFragmentsInSet(setName) {
-      const fragments = document.querySelector(`#set-${setName} .fragments`);
-      const fragmentElements = Array.from(fragments.children);
-      
-      fragmentElements.sort((a, b) => {
-        const aId = a.id;
-        const bId = b.id;
-        const aNum = parseInt(aId.split('-')[1]);
-        const bNum = parseInt(bId.split('-')[1]);
-        return aNum - bNum;
-      });
-      
-      fragments.innerHTML = '';
-      fragmentElements.forEach(element => {
-        fragments.appendChild(element);
-      });
-      
-      fragmentElements.forEach((element, index) => {
-        element.style.animation = `fragmentSort 0.8s ease-out ${index * 0.1}s`;
+    
+    function _0x44qr(_0xggop) {
+      const _0xhhqr = _0xggop.trim().split('\n');
+      const _0xiist = _0xhhqr[0].split(',');
+      return _0xhhqr.slice(1).map(_0xjjuv => {
+        const _0xkkwx = _0x1122yz(_0xjjuv);
+        const _0xllaa = {};
+        _0xiist.forEach((_0xmmbb, _0xnncc) => {
+          _0xllaa[_0xmmbb] = _0xkkwx[_0xnncc] || '';
+        });
+        return _0xllaa;
       });
     }
-
-    function showSetCompletionMessage(setName) {
-      const statusBar = document.getElementById('statusBar');
-      const originalBg = statusBar.style.background;
+    
+    function _0x1122yz(_0xjjuv) {
+      const _0xoodd = [];
+      let _0xppee = '';
+      let _0xqqff = false;
       
-      statusBar.textContent = `{memory ${setName} reconstructed}`;
-      statusBar.style.background = 'rgba(255, 255, 0, 0.3)';
-      statusBar.style.animation = 'setCompleteFlash 2s ease-out';
+      for (let _0xrrgg = 0; _0xrrgg < _0xjjuv.length; _0xrrgg++) {
+        const _0xsshh = _0xjjuv[_0xrrgg];
+        if (_0xsshh === '"') {
+          _0xqqff = !_0xqqff;
+        } else if (_0xsshh === ',' && !_0xqqff) {
+          _0xoodd.push(_0xppee);
+          _0xppee = '';
+        } else {
+          _0xppee += _0xsshh;
+        }
+      }
+      _0xoodd.push(_0xppee);
+      return _0xoodd;
+    }
+    
+    // Crypto functions with obfuscation
+    async function _0x2d8f(_0xttii, _0xuujj) {
+      const _0xvvkk = new TextEncoder();
+      const _0xwwll = _0xvvkk.encode(_0xuujj);
+      const _0xxxmm = _0xvvkk.encode(_0xttii);
+      
+      const _0xyynn = await crypto.subtle.importKey(
+        'raw',
+        _0xwwll,
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign']
+      );
+      
+      const _0xzzoo = await crypto.subtle.sign('HMAC', _0xyynn, _0xxxmm);
+      return btoa(String.fromCharCode(...new Uint8Array(_0xzzoo)));
+    }
+    
+    function _0x1133pp(_0x2244qq) {
+      const _0x3355rr = _0x2244qq.match(/\(fragment\s+(\d+)\s+of\s+\d+,\s+memory\s+code:\s+(\w+)\./);
+      return _0x3355rr ? _0x3355rr[2] + _0x3355rr[1] : null;
+    }
+    
+    function _0x4466ss() {
+      const _0x5577tt = document.querySelectorAll('.file-slot');
+      _0x5577tt.forEach((_0x6688uu, _0x7799vv) => {
+        _0x6688uu.className = 'file-slot';
+        if (_0x5e6f[_0x7799vv]) {
+          _0x6688uu.classList.add('filled');
+          _0x6688uu.textContent = _0x5e6f[_0x7799vv].name.split('.')[0];
+        } else {
+          _0x6688uu.textContent = _0x7799vv + 1;
+        }
+      });
+    }
+    
+    function _0xffmn(_0x88aaww) {
+      const _0x99bbxx = document.getElementById('progressPopup');
+      const _0xaaccyy = _0x1a2b;
+      const _0xbbddzz = _0x9i0j.length;
+      
+      _0x99bbxx.textContent = `(${_0xbbddzz}/8) Memory ${_0x88aaww} recovered!`;
+      _0x99bbxx.style.display = 'block';
       
       setTimeout(() => {
-        statusBar.style.animation = '';
-        statusBar.style.background = originalBg;
-        updateStatusBar();
-      }, 2000);
+        _0x99bbxx.style.display = 'none';
+      }, 4000);
     }
-
-    function updateStatusBar() {
-      const statusBar = document.getElementById('statusBar');
-      
-      if (completedSets.length === 0) {
-        statusBar.textContent = '[waiting for fragments]';
-      } else if (completedSets.length < 3) {
-        statusBar.textContent = `[${completedSets.length}/3 memories complete: ${completedSets.join(', ')}]`;
+    
+    function _0x66uv() {
+      // Update status bar with completed memories count
+      const _0xeeggcc = document.getElementById('statusBar');
+      if (_0x9i0j.length >= 3) {
+        // Hide everything and show victory message
+        document.querySelector('.container').style.display = 'none';
+        document.body.innerHTML = `
+          <div style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            font-size: 4rem;
+            font-weight: bold;
+            color: #00ff88;
+            text-shadow: 0 0 20px #00ff88, 0 0 40px #00ff88;
+            animation: pulse 2s infinite;
+          ">
+            <style>
+              @keyframes pulse {
+                0%, 100% { opacity: 1; transform: scale(1); }
+                50% { opacity: 0.8; transform: scale(1.05); }
+              }
+            </style>
+            ORPHEUS IS SAVED!
+          </div>
+        `;
+        return;
+      }
+      if (_0xeeggcc && !_0xeeggcc.textContent.includes('fragments loaded')) {
+        _0xeeggcc.textContent = `[${_0x9i0j.length}/3 memories reconstructed]`;
+      }
+    }
+    
+    function _0xcceeaa(_0xddffbb = null) {
+      const _0xeeggcc = document.getElementById('statusBar');
+      if (_0xddffbb) {
+        _0xeeggcc.textContent = _0xddffbb;
       } else {
-        statusBar.textContent = '[initiating orpheus protocol...]';
+        _0xeeggcc.textContent = `[${_0x9i0j.length}/3 memories reconstructed]`;
       }
     }
-
-    function triggerFinalSequence() {
-      submissionsLocked = true;
+    
+    async function _0xffhhdd(_0xggiiee) {
+      if (_0xggiiee.length !== 5) {
+        return { valid: false, error: 'Exactly 5 fragments required' };
+      }
       
-      const uploadSection = document.getElementById('uploadSection');
-      uploadSection.style.animation = 'fadeOut 1s ease-out';
-      setTimeout(() => {
-        uploadSection.style.display = 'none';
-      }, 1000);
+      const _0xhhjjff = [];
+      const _0xiikkgg = [];
+      
+      for (const _0xjjllhh of _0xggiiee) {
+        const _0xkkmmii = await _0xllnnjj(_0xjjllhh);
+        const _0xmmookk = _0x1133pp(_0xkkmmii);
+        
+        if (!_0xmmookk) {
+          return { valid: false, error: 'Invalid fragment format detected' };
+        }
+        
+        // Generate hash
+        const _0xnnppll = await _0x2d8f(_0xkkmmii, _0x4f8e);
+        
+        // Check if this fragment exists in database
+        const _0xooqqmm = _0x7g8h.find(_0xpprrnn => 
+          _0xpprrnn.number === _0xjjllhh.name.split('.')[0] && 
+          _0xpprrnn.memory_code === _0xmmookk
+        );
+        
+        if (!_0xooqqmm) {
+          return { valid: false, error: 'Fragment not recognized' };
+        }
+        
+        _0xhhjjff.push(_0xmmookk);
+        _0xiikkgg.push(_0xnnppll);
+      }
+      
+      // Check if all fragments are from the same group
+      const _0xqqssoo = _0xhhjjff.map(_0xrrttpp => _0xrrttpp.replace(/\d+$/, ''));
+      const _0xssuuqq = [...new Set(_0xqqssoo)];
+      
+      if (_0xssuuqq.length !== 1) {
+        return { valid: false, error: 'At least one fragment is incorrect' };
+      }
+      
+      const _0xttvvrr = _0xssuuqq[0];
+      
+      // Check if this group is already completed
+      if (_0x9i0j.some(_0xccgh => _0xccgh.group_name === _0xttvvrr)) {
+        return { valid: false, error: `Memory ${_0xttvvrr} already recovered` };
+      }
+      
+      // Check if we have all 5 fragments (1-5)
+      const _0xuuwwss = _0xhhjjff.map(_0xrrttpp => parseInt(_0xrrttpp.match(/\d+$/)[0]));
+      const _0xvvxxtt = [1, 2, 3, 4, 5];
+      const _0xwwyyuu = _0xvvxxtt.every(_0xzzaavv => _0xuuwwss.includes(_0xzzaavv));
+      
+      if (!_0xwwyyuu) {
+        return { valid: false, error: 'Incomplete fragment set' };
+      }
+      
+      return { valid: true, groupName: _0xttvvrr };
     }
-
-    function createScreenFlash() {
-      const flash = document.createElement('div');
-      flash.style.position = 'fixed';
-      flash.style.top = '0';
-      flash.style.left = '0';
-      flash.style.width = '100%';
-      flash.style.height = '100%';
-      flash.style.background = 'rgba(255, 255, 255, 0.8)';
-      flash.style.zIndex = '9999';
-      flash.style.animation = 'screenFlash 0.5s ease-out';
-      document.body.appendChild(flash);
-      
-      setTimeout(() => {
-        flash.remove();
-      }, 500);
+    
+    async function _0x1144bbww(_0x88aaww, _0x2255ccxx) {
+      try {
+        const _0x3366ddyy = await fetch('/api/database', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            groupName: _0x88aaww,
+            completedBy: _0x2255ccxx
+          })
+        });
+        
+        const _0x4477eezz = await _0x3366ddyy.json();
+        
+        if (_0x3366ddyy.ok) {
+          const _0x5588ffaa = {
+            group_name: _0x88aaww,
+            completed_by: _0x2255ccxx,
+            completion_time: new Date().toISOString()
+          };
+          
+          _0x9i0j.push(_0x5588ffaa);
+          _0xffmn(_0x88aaww);
+          return true;
+        } else {
+          console.error('Database submission failed:', _0x4477eezz.error);
+          return false;
+        }
+      } catch (_0x77wx) {
+        console.error('Database submission failed:', _0x77wx);
+        return false;
+      }
     }
-
-    async function handleFileUpload(event) {
-      event.preventDefault();
-      
-      if (submissionsLocked) {
-        alert('SUBMISSIONS LOCKED - ORPHEUS PROTOCOL ACTIVE');
+    
+    function _0xllnnjj(_0xjjllhh) {
+      return new Promise((_0x6699ggbb, _0x7700hhcc) => {
+        const _0x8811iidd = new FileReader();
+        _0x8811iidd.onload = _0x9922jjee => _0x6699ggbb(_0x9922jjee.target.result);
+        _0x8811iidd.onerror = _0x7700hhcc;
+        _0x8811iidd.readAsText(_0xjjllhh);
+      });
+    }
+    
+    async function _0x1010kkff(_0x1111llgg) {
+      // Check if we already have 3 memories - if so, show victory message
+      if (_0x9i0j.length >= 3) {
+        _0x66uv(); // This will trigger the victory screen
+        _0x1111llgg.target.value = '';
         return;
       }
       
-      const submitterName = document.getElementById('submitterName').value.trim();
-      const fileInput = document.getElementById('fileUpload');
-      const file = fileInput.files[0];
+      const _0x1212mmhh = Array.from(_0x1111llgg.target.files);
       
-      if (!submitterName || !file) {
-        alert('MISSING DATA - AGENT DESIGNATION AND FRAGMENT REQUIRED');
+      if (_0x1212mmhh.length > 5) {
+        alert('Maximum 5 files allowed');
+        _0x1111llgg.target.value = '';
         return;
       }
+      
+      _0x5e6f = _0x1212mmhh;
+      _0x4466ss();
+      _0xcceeaa();
+    }
+    
+    async function _0x1313nnii(_0x1414ooii) {
+      _0x1414ooii.preventDefault();
+      
+      // Check if we already have 3 memories - if so, show victory message
+      if (_0x9i0j.length >= 3) {
+        _0x66uv(); // This will trigger the victory screen
+        return;
+      }
+      
+      const _0x1515ppkk = document.getElementById('submitterName').value.trim();
+      
+      if (!_0x1515ppkk) {
+        alert('Name required');
+        return;
+      }
+      
+      if (_0x5e6f.length === 0) {
+        alert('No files uploaded');
+        return;
+      }
+      
+      _0xcceeaa('[validating fragments...]');
       
       try {
-        const fileContent = await readFileContent(file);
-        const fragmentData = fileContent.trim();
+        const _0x1616qqll = await _0xffhhdd(_0x5e6f);
         
-        const match = fragmentData.match(/^([A-Z]+)(\d+)$/);
-        
-        if (!match) {
-          alert('INVALID FRAGMENT FORMAT - EXPECTED FORMAT: SETNAME+NUMBER');
+        if (!_0x1616qqll.valid) {
+          _0xcceeaa(`[error: ${_0x1616qqll.error}]`);
+          // Mark grid as error
+          document.querySelectorAll('.file-slot.filled').forEach(_0x1717rrmm => {
+            _0x1717rrmm.classList.add('error');
+          });
+          
+          setTimeout(() => {
+            document.querySelectorAll('.file-slot').forEach(_0x1717rrmm => {
+              _0x1717rrmm.classList.remove('error');
+            });
+            _0xcceeaa();
+          }, 3000);
+          
           return;
         }
         
-        const [, setName, numberStr] = match;
-        const number = parseInt(numberStr);
+        _0xcceeaa('[submitting to database...]');
         
-        if (!FRAGMENT_SETS.includes(setName) || number < 1 || number > 5) {
-          alert('UNKNOWN FRAGMENT TYPE - FRAGMENT REJECTED');
-          return;
-        }
+        const _0x1818ssnn = await _0x1144bbww(_0x1616qqll.groupName, _0x1515ppkk);
         
-        if (reconstructionData[setName].fragments[number]) {
-          alert(`FRAGMENT ${setName}${number} ALREADY RECONSTRUCTED`);
-          return;
-        }
-        
-        const computerFingerprint = getComputerFingerprint();
-        const setData = reconstructionData[setName];
-        
-        // Check if this is the first fragment for this set
-        const isFirstFragment = Object.keys(setData.fragments).length === 0;
-        
-        if (isFirstFragment) {
-          // Set the origin computer for this set
-          setData.originComputer = computerFingerprint;
+        if (_0x1818ssnn) {
+          _0xcceeaa(`[memory ${_0x1616qqll.groupName} reconstructed!]`);
+          
+          // Reset form
+          document.getElementById('uploadForm').reset();
+          _0x5e6f = [];
+          _0x4466ss();
+          
+          setTimeout(() => {
+            _0xcceeaa();
+          }, 3000);
         } else {
-          // Check if this fragment comes from the same computer
-          if (setData.originComputer !== computerFingerprint) {
-            alert('Error: these five memories do not match.');
-            return;
-          }
+          _0xcceeaa('[database error - try again]');
         }
-         reconstructionData[setName].fragments[number] = {
-          submitter: submitterName,
-          filename: file.name,
-          timestamp: Date.now(),
-          computerFingerprint: computerFingerprint
-        };
-
         
-        document.getElementById('uploadForm').reset();
-        
-        showSuccessMessage(`FRAGMENT ${setName}${number} ACCEPTED - AGENT ${submitterName}`);
-        
-        // Check if this set is now complete
-        checkSetCompletion(setName);
-        
-      } catch (error) {
-        console.error('Upload error:', error);
-        alert('UPLOAD FAILED - FRAGMENT CORRUPTED');
+      } catch (_0x77wx) {
+        console.error('Submission error:', _0x77wx);
+        _0xcceeaa('[system error - fragments corrupted]');
       }
     }
-
-    function readFileContent(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.onerror = reject;
-        reader.readAsText(file);
-      });
+    
+    // Initialize the application
+    async function _0x1919ttoo() {
+      await _0x11kl();
+      
+      document.getElementById('fileUpload').addEventListener('change', _0x1010kkff);
+      document.getElementById('uploadForm').addEventListener('submit', _0x1313nnii);
+      
+      // Show initial memory count
+      _0x66uv();
     }
-
-    function showSuccessMessage(message) {
-      const statusBar = document.getElementById('statusBar');
-      const originalText = statusBar.textContent;
-      const originalBg = statusBar?.style.background
-      
-      statusBar.textContent = message;
-      statusBar.style.background = 'rgba(0, 255, 136, 0.3)';
-      
-      setTimeout(() => {
-        updateStatusBar();
-        statusBar.style.background = originalBg;
-      }, 3000);
-    }
-
-    function initialize() {
-      initializeReconstructionData();
-      
-      document.getElementById('uploadForm').addEventListener('submit', handleFileUpload);
-      
-      updateStatusBar();
-    }
-
-    initialize();
+    
+    // Start the app
+    _0x1919ttoo();
   </script>
 </body>
 </html>
