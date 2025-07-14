@@ -18,7 +18,4 @@ export default defineConfig({
   },
 
   adapter: vercel(),
-
-  middleware: true,
-});
 });

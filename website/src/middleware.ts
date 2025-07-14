@@ -8,7 +8,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const match = path.match(/^\/(\d{4})$/);
   if (match) {
     const code = match[1];
-    return Response.redirect(`${url.origin}/fragment/${code}.txt`, 302);
+    return Response.redirect(`${url.origin}/fragments/${code}.txt`, 302);
   }
 
   return next();
