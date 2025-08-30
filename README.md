@@ -21,7 +21,7 @@ This repo holds all the code that went into making Undernet, the source for the 
 
 Undernet was put together in around a week, so a lot of things went wrong. But there were also a ton of things that went great! Starting with the biggest issue: procrastination. Two hours before the event was scheduled, we still didn't have the site deployed, the reconstructor working, or our QR code locations finalized. 
 
-Luckily the vibes at Undercity were great, and with the help of Annabel (@phthallo) and Copilot (be quiet.), we were able to get most things deployed and ready. Oh, and the astro middleware I had put in place to fix one of the redirects didn't work, but we wouldn't learn about that until it was too late.
+Luckily the vibes at Undercity were great, and with the help of Annabel (@phthallo) and Github Copilot (be quiet.), we were able to get most things deployed and ready. Oh, and the astro middleware I had put in place to fix one of the redirects didn't work, but we wouldn't learn about that until it was too late.
 
 The event itself went really smoothly - people were running around, solving puzzles, and having a good time. Right up until people cracked the FILTER puzzle and got their memory fragment URLs. Due to the aforementioned middleware breaking, these URLs didn't work at all.
 
