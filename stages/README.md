@@ -33,7 +33,13 @@ The last QR works a little differently; instead of encoding a random string, we 
 
 Well, in theory. We had to hardcode the URL because it turned out to be different than what I printed on the QR.
 
+<img width="1199" height="776" alt="image" src="https://github.com/user-attachments/assets/80883970-0540-4205-8186-765ef5edee66" />
+
+*running around looking for the QRs!*
+
 ## 3. INSPECT
+
+<img width="1593" height="895" alt="image" src="https://github.com/user-attachments/assets/a95c8f44-0df3-4cf3-b904-e49faedd324d" />
 
 You are greeted with an Undernet "member portal" - it has some events from years ago and a broken chat server. Unlike the last puzzle, this puzzle encourages you to use inspect element. One of the events listed is a talk about hiding messages in websites, and that's exactly what we've done here. This is hidden in the source code:
 
@@ -48,6 +54,8 @@ You'll need to unbase64 the location, then decrypt it using the Vigenere cipher 
 We used [ciphereditor](https://ciphereditor.com/) to plan out layered ciphers - it's very useful for making *and* solving ARGs!
 
 ## 4. SIGNAL
+
+<img width="1245" height="826" alt="image" src="https://github.com/user-attachments/assets/b1ef6e29-accb-4b83-9e6f-e12ff043c602" />
 
 Behind the statue is a breadboard with only an Orpheus Pico and LED. The LED is flashing Morse code for `6029`. Once you tell this code to an organizer, they hand you a USB stick.
 
