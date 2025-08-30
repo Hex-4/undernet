@@ -12,6 +12,8 @@ This repo holds all the code that went into making Undernet, the source for the 
 
 ***[/// PUZZLES ///](/stages/)***
 
+***[/// FIGMA DESIGNS ///](https://www.figma.com/design/rzvrqZLjqcjfQIQfDEOGmX/undernet)***
+
 ![A bunch of teen hackers crowded around a table, trying to solve a puzzle](https://hc-cdn.hel1.your-objectstorage.com/s/v3/c24a5899eb9b31959c1492af03d843dce6ff4e14_image.png)
 
 ![3 people looking at a laptop](https://hc-cdn.hel1.your-objectstorage.com/s/v3/d502657cdaf79f4e8a229a399631aa03ba2950e5_image.png)
